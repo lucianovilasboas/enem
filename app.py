@@ -101,5 +101,5 @@ with st.expander("Ver tabela de dados filtrados", expanded=False):
 
 
 
-st.caption("Desenvolvido com ❤️ por Luciano Espiridiao. 2025 - Todos os direitos reservados.")
+# st.caption("Desenvolvido com ❤️ por Luciano Espiridiao. 2025 - Todos os direitos reservados.")
 
