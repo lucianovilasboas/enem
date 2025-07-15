@@ -87,7 +87,7 @@ fig = px.line(
     y=mapa_componentes[componente_sel],
     color="LEGENDA",
     markers=True,
-    title=f"{cidade_sel}: Evolução da Média das Escolas no ENEM (2014-2024)",
+    title=f"{cidade_sel}: Evolução da Média ({componente_sel}) das Escolas no ENEM (2014-2024)",
     color_discrete_map=color_discrete_map,
     labels={
         "ANO": "Ano",
@@ -119,7 +119,7 @@ st.plotly_chart(fig, use_container_width=True)
 
 
 # --------- Gráfico Violinplot para comparação das médias ---------
-st.subheader("Comparação das Distribuições das Médias por Rede/Campus")
+st.subheader(f"Comparação das Distribuições das Médias ({componente_sel}) por Rede/Campus")
 fig_violin = px.violin(
     df_filt,
     y=mapa_componentes[componente_sel],
