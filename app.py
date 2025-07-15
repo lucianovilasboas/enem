@@ -222,7 +222,8 @@ fig_gap.update_layout(
     template="plotly_white",
     xaxis=dict(dtick=1),
     yaxis_title="Diferença da Média",
-    legend_title="GAP vs Rede"
+    legend_title="GAP vs Rede",
+    hovermode="x unified",
 )
 st.plotly_chart(fig_gap, use_container_width=True)
 
@@ -267,7 +268,22 @@ fig_grupo_linha = px.line(
         'IFMG': '#15ac15', 'Rede Estadual': '#ff7f0e', 'Rede Municipal': '#1f77b4', 'Rede Privada': '#d62728'
     }
 )
-fig_grupo_linha.update_layout(template="plotly_white", xaxis=dict(dtick=1))
+fig_grupo_linha.update_layout(template="plotly_white", xaxis=dict(dtick=1),hovermode="x unified",
+    legend_title="Rede/Grupo",
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.25,
+        xanchor="center",
+        x=0.5
+    )
+)
+
+fig_grupo_linha.update_traces(
+    selector=dict(name='IFMG'),
+    line=dict(width=5, color= '#15ac15'),
+    marker=dict(size=8, symbol='x', color='yellow'),
+)
 st.plotly_chart(fig_grupo_linha, use_container_width=True)
 
 # 3. Boxplot/Violinplot das médias (todos os anos juntos)
