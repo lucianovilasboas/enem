@@ -52,7 +52,7 @@ mapa_componentes = dict([('Média','MEDIA'),
                 ('Matemática e suas Tecnologias', 'MT'), 
                 ('Redação','RD')])
 
-col = st.columns([4,2])
+col = st.columns([1,1])
 with col[0]:
     cidade_sel = st.selectbox("Selecione o Campus:", cidades)
 
