@@ -106,8 +106,23 @@ fig.update_layout(
 fig.update_traces(
     selector=dict(name=f'Campus {cidade_sel}'),
     line=dict(width=5, color=color_discrete_map[f'Campus {cidade_sel}']),
-    marker=dict(size=8, symbol='x', color='black'),
+    marker=dict(size=8, symbol='x', color='yellow'),
 )
+
+fig.update_layout(
+    xaxis=dict(dtick=1),
+    legend_title="Escola/Dependência",
+    template="plotly_white",
+    hovermode="x unified",
+    legend=dict(
+        orientation="h",
+        yanchor="bottom",
+        y=-0.25,
+        xanchor="center",
+        x=0.5
+    )
+)
+
 
 st.plotly_chart(fig, use_container_width=True)
 
@@ -119,7 +134,7 @@ with st.expander("Ver tabela de dados filtrados", expanded=False):
 
 
 st.markdown("---")
-st.markdown("#### Desenvolvido a partir dos microdados do ENEM 2014-2024 disponibilizados pelo INEP em [gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem).")
+st.markdown("Desenvolvido a partir dos microdados do ENEM 2014-2024 disponibilizados pelo INEP em [gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem).")
 st.markdown("---")
 st.caption("Desenvolvido por [Luciano Espiridiao](luciano.espiriao@ifmg.edu.br). 2025 - Todos os direitos reservados.")
 
