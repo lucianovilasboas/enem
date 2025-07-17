@@ -13,13 +13,23 @@ com as redes Estadual, Municipal e Privada.
 Selecione o campus e a área de conhecimento para ver os dados.
 """)
 
+
+@st.cache_data
+def ler_csv():
+    csv_file = 'enens2014-2024.csv'
+    df = pd.read_csv(csv_file, sep=';')
+
+    # Corrige possíveis espaços nos nomes das colunas
+    df.columns = df.columns.str.strip()
+
+    return df
+
+
+
 # --------- Leitura do CSV ---------
 # Substitua pelo caminho correto do seu arquivo
-csv_file = 'enens2014-2024.csv'
-df = pd.read_csv(csv_file, sep=';')
+df = ler_csv()
 
-# Corrige possíveis espaços nos nomes das colunas
-df.columns = df.columns.str.strip()
 
 # --------- Filtros ---------
 
