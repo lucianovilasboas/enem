@@ -16,7 +16,7 @@ Selecione o campus e a área de conhecimento para ver os dados.
 
 @st.cache_data
 def ler_csv():
-    csv_file = 'enens2014-2024.csv'
+    csv_file = 'enens2014-2025.csv'
     df = pd.read_csv(csv_file, sep=';')
 
     # Corrige possíveis espaços nos nomes das colunas
@@ -79,15 +79,16 @@ df_filt = df[
 df_filt['LEGENDA'] = df_filt['DEPENDENCIA'].apply(
     lambda d: f'Campus {cidade_sel}' if d == 'Federal' else f'Rede {d}'
 )
+
 # --------- Remoção de colunas desnecessárias ---------
 df_filt = df_filt.drop(columns=['DEPENDENCIA','POSICAO'])
 
 # --------- Cores fixas para Dependência/Campus ---------
 color_discrete_map = {
     f'Campus {cidade_sel}': "#15ac15",    # verde
-    'Rede Estadual': '#ff7f0e',                # laranja
-    'Rede Municipal': '#1f77b4',               # azul
-    'Rede Privada': '#d62728'                  # vermelho
+    'Rede Estadual': '#ff7f0e',           # laranja
+    'Rede Municipal': '#1f77b4',          # azul
+    'Rede Privada': '#d62728'             # vermelho
 }
 
 # --------- Gráfico ---------
@@ -339,7 +340,7 @@ st.plotly_chart(fig_grupo_rank, use_container_width=True)
 
 
 st.markdown("---")
-st.markdown("Desenvolvido a partir dos microdados do ENEM 2014-2024 disponibilizados pelo INEP em [gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem).")
+st.markdown("Desenvolvido a partir dos microdados do ENEM 2014-2025 disponibilizados pelo INEP em [gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem](https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem).")
 st.markdown("---")
-st.caption("Desenvolvido por [Luciano Espiridiao](luciano.espiriao@ifmg.edu.br). 2025 - Todos os direitos reservados.")
+st.caption("Desenvolvido por [Luciano Espiridiao](luciano.espiriao@ifmg.edu.br). 2026 - Todos os direitos reservados.")
 
