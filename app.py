@@ -5,7 +5,7 @@ import plotly.express as px
 # --------- Configurações iniciais ---------
 st.set_page_config(page_title="Evolução da Média no ENEM por Campus do IFMG", layout="wide")
 
-st.title("Evolução da Média no ENEM por Campus do IFMG (2014-2024)")
+st.title("Evolução da Média no ENEM por Campus do IFMG (2014-2025)")
 
 st.markdown("""
 Este aplicativo permite visualizar a evolução da média das escolas do ENEM para os campi do IFMG e comparar 
