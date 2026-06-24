@@ -139,7 +139,7 @@ with k2:
         <div class="kpi-label">Média MG (Rede Federal)</div>
     </div>""", unsafe_allow_html=True)
 with k3:
-    diff = media_ifmg_geral - media_br_federal
+    diff = abs(media_ifmg_geral - media_br_federal)
     cor = "#2ecc71" if diff > 0 else "#e74c3c"
     st.markdown(f"""
     <div class="kpi-card">
@@ -202,8 +202,8 @@ with c2:
     st.markdown("**  IFMG acima da média**")
     diff_ifmg_br = media_ifmg_geral - media_br_federal
     st.markdown(f"""
-    O IFMG supera a média da rede federal brasileira em **{diff_ifmg_br:.1f} pontos** 
-    e a média mineira da rede federal em **{media_ifmg_geral - media_mg_federal:.1f} pontos**.
+    O IFMG supera a média da rede federal brasileira em **{abs(diff_ifmg_br):.1f} pontos** 
+    e a média mineira da rede federal em **{abs(media_ifmg_geral - media_mg_federal):.1f} pontos**.
     """)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -213,7 +213,7 @@ with c2:
     st.markdown(f"""
     A média dos campi IFMG subiu de **{ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2014)]['MEDIA'].values[0]:.0f}** (2014) 
     para **{ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2025)]['MEDIA'].values[0]:.0f}** (2025) — 
-    um crescimento de **{ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2025)]['MEDIA'].values[0] - ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2014)]['MEDIA'].values[0]:.0f} pontos**.
+    um crescimento de **{abs(ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2025)]['MEDIA'].values[0] - ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2014)]['MEDIA'].values[0]):.0f} pontos**.
     """)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -495,5 +495,7 @@ st.markdown(f"""
 <div style="text-align:center; color:#666; font-size:0.85rem; padding:1rem;">
     Dashboard IFMG no ENEM — Dados ENEM/INEP (2014–2025) | {datetime.now().strftime('%B %Y')}<br>
     {len(CAMPUS_CIDADES)} campi analisados em {len(df_ifmg):,} registros ao longo de 12 anos.
+    https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem.<br>
+    Desenvolvido por luciano.espiriao@ifmg.edu.br. 2026 - Todos os direitos reservados.    
 </div>
 """, unsafe_allow_html=True)

@@ -608,6 +608,8 @@ st.markdown("---")
 st.markdown(f"""
 <div style="text-align:center; color:#666; font-size:0.85rem; padding:1rem;">
     Dashboard feito com dados do ENEM/INEP (2014–2025) — {datetime.now().strftime('%B %Y')}<br>
-    Cada ponto representa a média das escolas de um município. Mais de {len(df):,} registros analisados.
+    Cada ponto representa a média das escolas de um município disponibilizados pelo INEP em 
+    https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem. Mais de {len(df):,} registros analisados.<br>
+    Desenvolvido por luciano.espiriao@ifmg.edu.br. 2026 - Todos os direitos reservados.
 </div>
 """, unsafe_allow_html=True)
