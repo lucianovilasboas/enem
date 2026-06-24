@@ -140,7 +140,7 @@ Visão geral (nível alto):
 ├── microdados_enem_2009/
 ├── microdados_enem_2010/
 ├── ...
-├── microdados_enem_2024/
+├── microdados_enem_2025/
 └── microdados_enem_por_escola/
 ```
 
