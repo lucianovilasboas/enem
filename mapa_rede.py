@@ -65,15 +65,15 @@ geojson_estados = carregar_geojson_estados()
 geojson_mun = carregar_geojson_municipios()
 
 # Sidebar
-st.sidebar.header("Filtros")
+st.sidebar.header("🔍 Filtros")
 anos = sorted(df["ANO"].unique())
-ano_sel = st.sidebar.selectbox("Ano", anos)
+ano_sel = st.sidebar.selectbox("📅 Ano", anos)
 
 redes = sorted(df["DEPENDENCIA"].unique())
-rede_sel = st.sidebar.multiselect("Rede(s)", redes, default=redes)
+rede_sel = st.sidebar.multiselect("🏫 Rede(s)", redes, default=redes)
 
 ufs = sorted(df["SG_UF_ESC"].unique())
-uf_sel = st.sidebar.multiselect("Estado(s)", ufs, default=[])
+uf_sel = st.sidebar.multiselect("🗺️ Estado(s)", ufs, default=[])
 
 # Filtrar
 filtro = df["ANO"] == ano_sel
@@ -119,7 +119,7 @@ if geojson_mun is not None:
 
 
 # ---- MAPAS ----
-st.subheader(f"Mapas ({ano_sel})")
+st.subheader(f"🗺️ Mapas ({ano_sel})")
 
 media_uf_ano = df_ano.groupby("SG_UF_ESC")["MEDIA"].mean().reset_index()
 
@@ -144,7 +144,7 @@ with tab_estado:
 
 with tab_mun:
     if geojson_mun is not None and not comp.empty:
-        rede_mapa = st.selectbox("Rede para visualizar no mapa", comp["DEPENDENCIA"].unique())
+        rede_mapa = st.selectbox("🗺️ Rede para visualizar no mapa", comp["DEPENDENCIA"].unique())
 
         comp_rede = comp[comp["DEPENDENCIA"] == rede_mapa].dropna(subset=["GEOJSON_NAME"]).copy()
         qtd = st.slider("Top N municípios", 10, 300, 100, key="qtd_mun_mapa")
@@ -184,7 +184,7 @@ with tab_mun:
         st.warning("GeoJSON não disponível ou dados vazios para o filtro selecionado.")
 
 # ---- TABELA DE COMPARAÇÃO ----
-st.subheader("Tabela Comparativa por Município e Rede")
+st.subheader("📋 Tabela Comparativa por Município e Rede")
 
 if not comp.empty:
     colunas = [
@@ -214,9 +214,9 @@ if not comp.empty:
     st.download_button("Exportar CSV", data=csv, file_name=f"enem_municipio_rede_{ano_sel}.csv", mime="text/csv")
 
 # ---- GRÁFICO DE BARRAS ----
-st.subheader("Comparação: Média Municipal vs Estadual vs Nacional")
+st.subheader("📊 Comparação: Média Municipal vs Estadual vs Nacional")
 if not comp.empty:
-    rede_graf = st.selectbox("Rede", comp["DEPENDENCIA"].unique(), key="graf_rede")
+    rede_graf = st.selectbox("🏫 Rede", comp["DEPENDENCIA"].unique(), key="graf_rede")
     top_n = st.slider("Top N municípios", 5, 50, 20, key="top_graf")
     comp_graf = comp[comp["DEPENDENCIA"] == rede_graf].nlargest(top_n, "MEDIA_MUN")
 

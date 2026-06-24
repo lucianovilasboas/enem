@@ -8,7 +8,7 @@ import re
 from datetime import datetime
 import util
 
-st.set_page_config(page_title="IFMG no ENEM 2014-2025", layout="wide", page_icon="")
+
 
 st.markdown("""
 <style>

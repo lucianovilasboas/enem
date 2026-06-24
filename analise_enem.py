@@ -38,15 +38,15 @@ def carregar_dados():
 df = carregar_dados()
 
 # Sidebar para filtros
-st.sidebar.header("Filtros")
+st.sidebar.header("🔍 Filtros")
 anos_disponiveis = sorted(df["ANO"].unique())
 anos_sel = st.sidebar.slider("Intervalo de anos", min_value=int(min(anos_disponiveis)), max_value=int(max(anos_disponiveis)), value=(2014, 2025))
 
 ufs = sorted(df["SG_UF_ESC"].unique())
-uf_sel = st.sidebar.multiselect("Estado(s)", ufs, default=[])
+uf_sel = st.sidebar.multiselect("🗺️ Estado(s)", ufs, default=[])
 
 municipios = sorted(df["NO_MUNICIPIO_ESC"].unique())
-mun_sel = st.sidebar.multiselect("Município(s)", municipios, default=[])
+mun_sel = st.sidebar.multiselect("🏙️ Município(s)", municipios, default=[])
 
 df_filtrado = df[(df["ANO"] >= anos_sel[0]) & (df["ANO"] <= anos_sel[1])]
 if uf_sel:
@@ -76,7 +76,7 @@ media_federal.columns = ["ANO", "MEDIA"]
 media_federal["NIVEL"] = "Rede Federal"
 
 # ---- Comparação geral (todas as linhas) ----
-st.subheader("Evolução da Média Geral")
+st.subheader("📈 Evolução da Média Geral")
 fig = px.line(media_nacional, x="ANO", y="MEDIA", markers=True, title="Média Nacional")
 fig.update_layout(yaxis_range=[min(df["MEDIA"]), max(df["MEDIA"])])
 st.plotly_chart(fig, use_container_width=True)
@@ -85,7 +85,7 @@ st.plotly_chart(fig, use_container_width=True)
 abas = st.tabs(["Nacional x Rede Federal", "Por Estado", "Por Município"])
 
 with abas[0]:
-    st.subheader("Nacional vs Rede Federal")
+    st.subheader("⚖️ Nacional vs Rede Federal")
     comp = pd.concat([
         media_nacional[["ANO", "MEDIA", "NIVEL"]],
         media_federal[["ANO", "MEDIA", "NIVEL"]],
@@ -94,7 +94,7 @@ with abas[0]:
                    title="Comparação: Nacional x Rede Federal")
     st.plotly_chart(fig2, use_container_width=True)
 
-    st.subheader("Diferença (Rede Federal - Nacional)")
+    st.subheader("📊 Diferença (Rede Federal - Nacional)")
     merged = media_nacional.merge(media_federal, on="ANO", suffixes=("_nac", "_fed"))
     merged["DIFERENCA"] = merged["MEDIA_fed"] - merged["MEDIA_nac"]
     fig_diff = px.bar(merged, x="ANO", y="DIFERENCA",
@@ -103,7 +103,7 @@ with abas[0]:
     st.plotly_chart(fig_diff, use_container_width=True)
 
 with abas[1]:
-    st.subheader("Média por Estado ao longo dos anos")
+    st.subheader("🌍 Média por Estado ao longo dos anos")
     if uf_sel:
         fig3 = px.line(media_estado, x="ANO", y="MEDIA", color="SG_UF_ESC", markers=True)
         st.plotly_chart(fig3, use_container_width=True)
@@ -122,7 +122,7 @@ with abas[1]:
         st.plotly_chart(fig3, use_container_width=True)
 
 with abas[2]:
-    st.subheader("Média por Município ao longo dos anos")
+    st.subheader("🏙️ Média por Município ao longo dos anos")
     if mun_sel:
         fig4 = px.line(media_municipio, x="ANO", y="MEDIA",
                        color="NO_MUNICIPIO_ESC", line_dash="SG_UF_ESC", markers=True)
@@ -131,7 +131,7 @@ with abas[2]:
         st.info("Selecione um ou mais municípios no filtro lateral para visualizar.")
 
 # ---- Análise da Rede Federal ----
-st.subheader("Análise Detalhada — Rede Federal")
+st.subheader("🔬 Análise Detalhada — Rede Federal")
 st.markdown("Filtrando apenas escolas com dependência **Federal**.")
 
 tab_if, tab_top = st.tabs(["Evolução Rede Federal", "Top Escolas Federais por Ano"])
@@ -150,7 +150,7 @@ with tab_if:
         st.warning("Nenhum dado da Rede Federal no recorte selecionado.")
 
 with tab_top:
-    ano_sel = st.selectbox("Selecione o ano", anos_disponiveis)
+    ano_sel = st.selectbox("📅 Selecione o ano", anos_disponiveis)
     top_n = st.slider("Quantas escolas?", 1, 20, 10)
     df_ano = df_filtrado[df_filtrado["ANO"] == ano_sel].copy()
     top_escolas = df_ano.sort_values("MEDIA", ascending=False).head(top_n)
@@ -164,13 +164,13 @@ with tab_top:
     st.dataframe(top_escolas[["POSICAO", "NO_MUNICIPIO_ESC", "SG_UF_ESC", "DEPENDENCIA", "ALUNOS", "MEDIA"]])
 
 # ---- Mapa do Brasil ----
-st.subheader("Mapa do Brasil")
+st.subheader("🗺️ Mapa do Brasil")
 st.markdown("Visualização geográfica das médias do ENEM por **Estado** e por **Município**.")
 
 tab_mapa_estado, tab_mapa_mun = st.tabs(["Por Estado (Coroplético)", "Por Município (Mapa de Bolhas)"])
 
 with tab_mapa_estado:
-    ano_mapa = st.selectbox("Selecione o ano para o mapa", anos_disponiveis, key="ano_mapa_estado")
+    ano_mapa = st.selectbox("📅 Selecione o ano para o mapa", anos_disponiveis, key="ano_mapa_estado")
     media_uf_ano = df_filtrado[df_filtrado["ANO"] == ano_mapa].groupby("SG_UF_ESC")["MEDIA"].mean().reset_index()
 
     @st.cache_data(ttl=3600)
@@ -212,7 +212,7 @@ with tab_mapa_estado:
     )
 
 with tab_mapa_mun:
-    ano_mapa_mun = st.selectbox("Selecione o ano", anos_disponiveis, key="ano_mapa_mun")
+    ano_mapa_mun = st.selectbox("📅 Selecione o ano", anos_disponiveis, key="ano_mapa_mun")
     qtd_mun = st.slider("Quantidade de municípios", 10, 200, 80)
 
     media_mun_ano = (
@@ -295,7 +295,7 @@ with tab_mapa_mun:
     )
 
 # ---- Tabelas Resumo ----
-st.subheader("Tabelas Resumo")
+st.subheader("📋 Tabelas Resumo")
 with st.expander("Média Nacional por Ano"):
     st.dataframe(media_nacional.set_index("ANO").style.format("{:.2f}", subset=["MEDIA"]))
 

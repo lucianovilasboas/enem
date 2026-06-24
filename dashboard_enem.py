@@ -106,8 +106,8 @@ gap_priv_pub = gap_rede["Privada"] - gap_rede["Estadual"]
 
 # ─────────────────────────── HEADER ───────────────────────────
 
-st.markdown('<p class="title">  ENEM 2014–2025</p>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Uma década de educação brasileira em dados — tendências, desigualdades e surpresas</p>', unsafe_allow_html=True)
+st.markdown('<p class="title">   ENEM 2014–2025</p>', unsafe_allow_html=True)
+st.markdown('<p class="subtitle">   Uma década de educação brasileira em dados — tendências, desigualdades e surpresas</p>', unsafe_allow_html=True)
 
 k1, k2, k3, k4, k5 = st.columns(5)
 with k1:
@@ -151,7 +151,7 @@ st.markdown("---")
 
 # ─────────────────────────── CAPÍTULO 1: VISÃO GERAL ───────────────────────────
 
-st.markdown("##   Capítulo 1: A Década do ENEM")
+st.markdown("## 📈 Capítulo 1: A Década do ENEM")
 st.markdown("Como evoluiu a média nacional ao longo de 12 anos? Quem foram os protagonistas?")
 
 c1, c2 = st.columns([2, 1])
@@ -195,7 +195,7 @@ with c2:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # ─── Gráfico de Redes ───
-st.markdown("###  Abertura por Rede de Ensino")
+st.markdown("### 🏫 Abertura por Rede de Ensino")
 
 c3, c4 = st.columns([2, 1])
 
@@ -272,7 +272,7 @@ with c6:
 # Urbano vs Rural
 anos_loc = sorted(df[df["LOCALIZACAO"].notna()]["ANO"].unique())
 if len(anos_loc) >= 2:
-    st.markdown("###   Urbano vs Rural")
+    st.markdown("### 🏙️ Urbano vs Rural")
     st.info(f"Dados disponíveis apenas para os anos: {', '.join(str(a) for a in anos_loc)}", icon="ℹ️")
     urb_rural = df.groupby(["ANO", "LOCALIZACAO"])["MEDIA"].mean().reset_index()
 
@@ -313,7 +313,7 @@ st.markdown("---")
 
 # ─────────────────────────── CAPÍTULO 3: PROTAGONISTAS ───────────────────────────
 
-st.markdown("##   Capítulo 3: Os Protagonistas")
+st.markdown("## 🏆 Capítulo 3: Os Protagonistas")
 st.markdown("Estados e municípios que se destacaram ao longo da década.")
 
 c9, c10 = st.columns(2)
@@ -340,7 +340,7 @@ with c10:
     st.plotly_chart(fig_bot_uf, use_container_width=True)
 
 # Bump chart: evolução do ranking dos estados
-st.markdown("###   Corrida dos Estados: Ranking Ano a Ano")
+st.markdown("### 🏁 Corrida dos Estados: Ranking Ano a Ano")
 
 rank_uf = uf.copy()
 rank_uf["RANK"] = rank_uf.groupby("ANO")["MEDIA"].rank(ascending=False)
@@ -367,7 +367,7 @@ st.markdown("---")
 
 # ─────────────────────────── CAPÍTULO 4: DISCIPLINAS ───────────────────────────
 
-st.markdown("##   Capítulo 4: A Anatomia da Nota")
+st.markdown("## 🔬 Capítulo 4: A Anatomia da Nota")
 st.markdown("Como cada disciplina contribui para o resultado final? Onde cada rede se destaca?")
 
 disciplinas = ["LC", "CH", "CN", "MT", "RD"]
@@ -410,9 +410,9 @@ with c12:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Scatter plot: Mat x LC
-st.markdown("###   Matemática vs Linguagens: O Perfil das Redes")
+st.markdown("### 📐 Matemática vs Linguagens: O Perfil das Redes")
 
-ano_scatter = st.selectbox("Ano para análise", sorted(df["ANO"].unique()), key="scatter_ano")
+ano_scatter = st.selectbox("📅 Ano para análise", sorted(df["ANO"].unique()), key="scatter_ano")
 df_scatter = df[df["ANO"] == ano_scatter].groupby(["DEPENDENCIA", "NO_MUNICIPIO_ESC", "SG_UF_ESC"]).agg(
     MT=("MT", "mean"), LC=("LC", "mean"), MEDIA=("MEDIA", "mean"), ESCOLAS=("MEDIA", "count")
 ).reset_index()
@@ -434,7 +434,7 @@ st.markdown("---")
 
 # ─────────────────────────── CAPÍTULO 5: GAP EVOLUTION ───────────────────────────
 
-st.markdown("##   Capítulo 5: A Evolução do Gap")
+st.markdown("## 📊 Capítulo 5: A Evolução do Gap")
 st.markdown("As desigualdades estão aumentando ou diminuindo com o tempo?")
 
 c13, c14 = st.columns(2)
@@ -494,7 +494,7 @@ st.markdown("---")
 
 # ─────────────────────────── CAPÍTULO 6: MUNICÍPIOS ───────────────────────────
 
-st.markdown("##   Capítulo 6: Onde o Brasil Aprende Melhor")
+st.markdown("## 🗺️ Capítulo 6: Onde o Brasil Aprende Melhor")
 st.markdown("Os municípios que mais se destacaram — e os que mais evoluíram.")
 
 c15, c16 = st.columns(2)
@@ -529,7 +529,7 @@ with c16:
     st.plotly_chart(fig_top_fed, use_container_width=True)
 
 # Maiores evolutores
-st.markdown("###   Quem Mais Evoluiu?")
+st.markdown("### 📈 Quem Mais Evoluiu?")
 
 evol = tab_completa.groupby(["NO_MUNICIPIO_ESC", "SG_UF_ESC", "ANO"])["MEDIA"].mean().reset_index()
 evol_pivot = evol.pivot(index=["NO_MUNICIPIO_ESC", "SG_UF_ESC"], columns="ANO", values="MEDIA")
@@ -570,7 +570,7 @@ st.markdown("---")
 
 # ─────────────────────────── CAPÍTULO 7: O FUTURO ───────────────────────────
 
-st.markdown("##   Capítulo 7: Tendências e o Futuro")
+st.markdown("## 🔮 Capítulo 7: Tendências e o Futuro")
 st.markdown("O que os dados sugerem para os próximos anos?")
 
 c17, c18 = st.columns([2, 1])
