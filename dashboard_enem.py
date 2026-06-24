@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from glob import glob
 import re
 from datetime import datetime
+import util
 
 st.set_page_config(page_title="ENEM 2014-2025 — História em Dados", layout="wide", page_icon="")
 
@@ -44,10 +45,7 @@ def carregar_dados():
     df = pd.concat(dfs, ignore_index=True)
     for col in ["LC", "CH", "CN", "MT", "RD", "MEDIA"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    df["DEPENDENCIA"] = df["DEPENDENCIA"].str.strip().str.title()
-    df["SG_UF_ESC"] = df["SG_UF_ESC"].str.strip().str.upper()
-    df["NO_MUNICIPIO_ESC"] = df["NO_MUNICIPIO_ESC"].str.strip().str.title()
-    df["LOCALIZACAO"] = df["LOCALIZACAO"].str.strip().str.title() if df["LOCALIZACAO"].dtype == "object" else df["LOCALIZACAO"]
+    df = util.normalizar_dataframe(df)
 
     regioes = {
         "AC": "Norte", "AP": "Norte", "AM": "Norte", "PA": "Norte", "RO": "Norte", "RR": "Norte", "TO": "Norte",

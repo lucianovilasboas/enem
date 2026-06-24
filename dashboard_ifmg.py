@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 from glob import glob
 import re
 from datetime import datetime
+import util
 
 st.set_page_config(page_title="IFMG no ENEM 2014-2025", layout="wide", page_icon="")
 
@@ -43,6 +44,8 @@ COR_CAMPUS = {
     "Santa Luzia": "#3498db", "São João Evangelista": "#2ecc71", "Arcos": "#f39c12",
 }
 
+COR_CAMPUS_NORM = {util.normalizar_cidade(k): v for k, v in COR_CAMPUS.items()}
+
 @st.cache_data(show_spinner="Carregando dados do ENEM...")
 def carregar_dados():
     arquivos = sorted(glob("dados/ranking_escolas_enem*.csv"))
@@ -60,16 +63,14 @@ def carregar_dados():
     df = pd.concat(dfs, ignore_index=True)
     for col in ["LC", "CH", "CN", "MT", "RD", "MEDIA"]:
         df[col] = pd.to_numeric(df[col], errors="coerce")
-    df["DEPENDENCIA"] = df["DEPENDENCIA"].str.strip().str.title()
-    df["SG_UF_ESC"] = df["SG_UF_ESC"].str.strip().str.upper()
-    df["NO_MUNICIPIO_ESC"] = df["NO_MUNICIPIO_ESC"].str.strip().str.title()
-    df["LOCALIZACAO"] = df["LOCALIZACAO"].str.strip().str.title() if df["LOCALIZACAO"].dtype == "object" else df["LOCALIZACAO"]
+    df = util.normalizar_dataframe(df)
     return df
 
 
 @st.cache_data
 def preparar_dados_ifmg(df):
-    df_ifmg = df[df["NO_MUNICIPIO_ESC"].isin(CAMPUS_CIDADES) & (df["SG_UF_ESC"] == "MG")].copy()
+    campus_norm = [util.normalizar_cidade(c) for c in CAMPUS_CIDADES]
+    df_ifmg = df[df["NO_MUNICIPIO_ESC"].apply(util.normalizar_cidade).isin(campus_norm) & (df["SG_UF_ESC"] == "MG")].copy()
     df_ifmg["CAMPUS"] = df_ifmg["NO_MUNICIPIO_ESC"]
     return df_ifmg
 
@@ -235,7 +236,7 @@ c3, c4 = st.columns(2)
 with c3:
     rank_campus = df_ifmg[df_ifmg["DEPENDENCIA"] == "Federal"].groupby("CAMPUS")["MEDIA"].mean().sort_values(ascending=False).reset_index()
     rank_campus.columns = ["CAMPUS", "MEDIA"]
-    rank_campus["COR"] = rank_campus["CAMPUS"].map(COR_CAMPUS)
+    rank_campus["COR"] = rank_campus["CAMPUS"].apply(lambda x: COR_CAMPUS_NORM.get(util.normalizar_cidade(x), "#888"))
 
     fig_rank = px.bar(rank_campus, x="MEDIA", y="CAMPUS", orientation="h",
                       color="MEDIA", color_continuous_scale="Greens",
@@ -249,13 +250,14 @@ with c3:
 with c4:
     st.markdown("###   Série Temporal por Campus")
     campus_sel = st.selectbox("Selecione um campus", CAMPUS_CIDADES, key="campus_ts")
-    df_c = df_ifmg[(df_ifmg["CAMPUS"] == campus_sel) & (df_ifmg["DEPENDENCIA"] == "Federal")].sort_values("ANO")
+    sel_norm = util.normalizar_cidade(campus_sel)
+    df_c = df_ifmg[(df_ifmg["CAMPUS"].apply(util.normalizar_cidade) == sel_norm) & (df_ifmg["DEPENDENCIA"] == "Federal")].sort_values("ANO")
     df_c_br = nac_rede[nac_rede["REDE"] == "Federal"].copy()
     df_c_mg = mg[mg["REDE"] == "Federal"].copy()
 
     fig_ts = go.Figure()
     fig_ts.add_trace(go.Scatter(x=df_c["ANO"], y=df_c["MEDIA"], mode="lines+markers",
-                                name=campus_sel, line=dict(color=COR_CAMPUS.get(campus_sel, "#2ecc71"), width=4),
+                                name=campus_sel, line=dict(color=COR_CAMPUS_NORM.get(sel_norm, "#2ecc71"), width=4),
                                 marker=dict(size=10), hovertemplate="%{x}: %{y:.1f}<extra></extra>"))
     fig_ts.add_trace(go.Scatter(x=df_c_br["ANO"], y=df_c_br["MEDIA_BR"], mode="lines",
                                 name="Brasil (Federal)", line=dict(color="#e74c3c", width=2, dash="dash")))
@@ -356,7 +358,7 @@ for camp in sorted(rank_ano["CAMPUS"].unique()):
     d = rank_ano[rank_ano["CAMPUS"] == camp].sort_values("ANO")
     fig_bump.add_trace(go.Scatter(
         x=d["ANO"], y=d["RANK"], mode="lines+markers", name=camp,
-        line=dict(width=3, color=COR_CAMPUS.get(camp, "#888")),
+        line=dict(width=3, color=COR_CAMPUS_NORM.get(util.normalizar_cidade(camp), "#888")),
         marker=dict(size=8), text=d["RANK"].astype(int), textposition="middle right",
         hovertemplate="%{x}: %{y:.0f}º<extra></extra>",
     ))
@@ -386,7 +388,7 @@ with c7:
         theta = [labels_disc[d] for d in disciplinas] + [labels_disc[disciplinas[0]]]
         fig_radar.add_trace(go.Scatterpolar(
             r=vals, theta=theta, name=row["CAMPUS"],
-            line=dict(width=2, color=COR_CAMPUS.get(row["CAMPUS"], "#888")),
+            line=dict(width=2, color=COR_CAMPUS_NORM.get(util.normalizar_cidade(row["CAMPUS"]), "#888")),
             opacity=0.7,
         ))
     fig_radar.update_layout(title="Perfil por Disciplina — Todos os Campi", height=500,
@@ -396,7 +398,8 @@ with c7:
 
 with c8:
     campus_radar = st.selectbox("Campus para destaque", CAMPUS_CIDADES, key="campus_radar")
-    df_cr = radar_data[radar_data["CAMPUS"] == campus_radar]
+    radar_norm = util.normalizar_cidade(campus_radar)
+    df_cr = radar_data[radar_data["CAMPUS"].apply(util.normalizar_cidade) == radar_norm]
     if not df_cr.empty:
         vals = df_cr[disciplinas].iloc[0].tolist()
         theta = [labels_disc[d] for d in disciplinas]
@@ -405,7 +408,7 @@ with c8:
         fig_single.add_trace(go.Scatterpolar(
             r=vals + [vals[0]], theta=theta + [theta[0]],
             name=campus_radar, fill="toself",
-            line=dict(width=3, color=COR_CAMPUS.get(campus_radar, "#2ecc71")),
+            line=dict(width=3, color=COR_CAMPUS_NORM.get(radar_norm, "#2ecc71")),
         ))
         fig_single.update_layout(title=campus_radar, height=400,
                                  polar=dict(radialaxis=dict(visible=True, range=[450, 750])),
@@ -454,7 +457,8 @@ st.markdown("##   Capítulo 5: IFMG vs as Demais Redes nos Mesmos Municípios")
 st.markdown("Como o IFMG (Federal) se compara com as redes Estadual, Municipal e Privada nas mesmas cidades?")
 
 campus_comp = st.selectbox("Campus", CAMPUS_CIDADES, key="campus_comp")
-df_cc = df_ifmg[df_ifmg["CAMPUS"] == campus_comp].groupby(["ANO", "DEPENDENCIA"])["MEDIA"].mean().reset_index()
+comp_norm = util.normalizar_cidade(campus_comp)
+df_cc = df_ifmg[df_ifmg["CAMPUS"].apply(util.normalizar_cidade) == comp_norm].groupby(["ANO", "DEPENDENCIA"])["MEDIA"].mean().reset_index()
 
 fig_comp = go.Figure()
 cores_comp = {"Federal": "#2ecc71", "Estadual": "#e74c3c", "Municipal": "#f39c12", "Privada": "#3498db"}
