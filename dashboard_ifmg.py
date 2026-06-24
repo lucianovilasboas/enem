@@ -115,7 +115,7 @@ with c_logo:
     st.markdown("<h1 style='font-size:3rem; margin:0;'></h1>", unsafe_allow_html=True)
 with c_titulo:
     st.markdown("<p class='title'>  IFMG no ENEM</p>", unsafe_allow_html=True)
-    st.markdown("<p class='subtitle'>A trajetória dos Institutos Federais de Minas Gerais no ENEM 2014–2025 — desempenho, evolução e comparação com o Brasil</p>", unsafe_allow_html=True)
+    st.markdown("<p class='subtitle'>A trajetória do Instituto Federal de Minas Gerais no ENEM 2014–2025 — desempenho, evolução e comparação com o Brasil</p>", unsafe_allow_html=True)
 
 # KPIs
 media_ifmg_geral = df_ifmg["MEDIA"].mean()
