@@ -3,10 +3,8 @@ import pandas as pd
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 from glob import glob
 import re
-from collections import defaultdict
 from datetime import datetime
 
 st.set_page_config(page_title="ENEM 2014-2025 — História em Dados", layout="wide", page_icon="")
@@ -103,9 +101,8 @@ with st.spinner("Carregando dados..."):
 # ─────────────────────────── KPI GLOBAIS ───────────────────────────
 
 media_geral = nac["MEDIA"].mean()
-melhor_ano = nac.loc[nac["MEDIA"].idxmax()]
-pior_ano = nac.loc[nac["MEDIA"].idxmin()]
-gap_2014_2025 = nac[nac["ANO"] == 2025]["MEDIA"].values[0] - nac[nac["ANO"] == 2014]["MEDIA"].values[0]
+nac_idx = nac.set_index("ANO")["MEDIA"]
+gap_2014_2025 = nac_idx.loc[2025] - nac_idx.loc[2014]
 gap_rede = df.groupby("DEPENDENCIA")["MEDIA"].mean()
 gap_priv_pub = gap_rede["Privada"] - gap_rede["Estadual"]
 
@@ -119,7 +116,7 @@ with k1:
     st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-value">{media_geral:.1f}</div>
-        <div class="kpi-label">Média Geral (12 anos)</div>
+        <div class="kpi-label">Média Anual Nacional</div>
     </div>
     """, unsafe_allow_html=True)
 with k2:
@@ -169,11 +166,12 @@ with c1:
         text=nac["MEDIA"].round(1), textposition="top center",
         name="Brasil", hovertemplate="%{x}: %{y:.1f}<extra></extra>",
     ))
-    anos_destaque = [2014, 2020, 2022, 2025]
-    for a in anos_destaque:
-        row = nac[nac["ANO"] == a]
-        fig1.add_annotation(x=a, y=row["MEDIA"].values[0], text=f"<b>{row['MEDIA'].values[0]:.1f}</b>",
-                            showarrow=True, arrowhead=3, arrowsize=1.5, ax=0, ay=-40, font=dict(size=13))
+    med_por_ano = nac.set_index("ANO")["MEDIA"]
+    for a in [2014, 2020, 2022, 2025]:
+        if a in med_por_ano.index:
+            y_val = med_por_ano.loc[a]
+            fig1.add_annotation(x=a, y=y_val, text=f"<b>{y_val:.1f}</b>",
+                                showarrow=True, arrowhead=3, arrowsize=1.5, ax=0, ay=-40, font=dict(size=13))
     fig1.update_layout(title="Evolução da Média Nacional no ENEM", height=450,
                        xaxis=dict(dtick=1, tickangle=0), hovermode="x unified",
                        yaxis=dict(range=[480, 540]), margin=dict(l=0, r=0, t=50, b=0))
@@ -182,9 +180,11 @@ with c1:
 with c2:
     st.markdown('<div class="insight-box">', unsafe_allow_html=True)
     st.markdown("**   Tendência de alta**")
+    nac["DIF"] = nac["MEDIA"].diff()
+    max_jump = nac.loc[nac["DIF"].idxmax()]
     st.markdown(f"""
     A média nacional subiu **{gap_2014_2025:+.1f} pontos** em 12 anos — um crescimento consistente, 
-    com aceleração notável a partir de 2022. O maior salto foi entre 2021 e 2022 (+13,2 pts).
+    com aceleração notável a partir de 2022. O maior salto foi entre {int(max_jump['ANO'])-1} e {int(max_jump['ANO'])} (+{max_jump['DIF']:.1f} pts).
     """)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -212,10 +212,9 @@ with c3:
     st.plotly_chart(fig2, use_container_width=True)
 
 with c4:
-    media_redes = df.groupby("DEPENDENCIA")["MEDIA"].mean().sort_values()
     fig_donut = go.Figure(data=[go.Pie(
-        labels=media_redes.index, values=media_redes.values,
-        marker=dict(colors=[cores_rede[r] for r in media_redes.index]),
+        labels=gap_rede.sort_values().index, values=gap_rede.sort_values().values,
+        marker=dict(colors=[cores_rede[r] for r in gap_rede.sort_values().index]),
         textinfo="label+value", texttemplate="%{label}<br>%{value:.1f}", hole=0.5,
     )])
     fig_donut.update_layout(title="Média Geral por Rede", height=350, margin=dict(l=0, r=0, t=50, b=0),
@@ -273,8 +272,10 @@ with c6:
     st.markdown("</div>", unsafe_allow_html=True)
 
 # Urbano vs Rural
-if df["LOCALIZACAO"].notna().any():
+anos_loc = sorted(df[df["LOCALIZACAO"].notna()]["ANO"].unique())
+if len(anos_loc) >= 2:
     st.markdown("###   Urbano vs Rural")
+    st.info(f"Dados disponíveis apenas para os anos: {', '.join(str(a) for a in anos_loc)}", icon="ℹ️")
     urb_rural = df.groupby(["ANO", "LOCALIZACAO"])["MEDIA"].mean().reset_index()
 
     c7, c8 = st.columns([2, 1])
@@ -300,11 +301,13 @@ if df["LOCALIZACAO"].notna().any():
         """)
         st.markdown("</div>", unsafe_allow_html=True)
 
+        rural_fed = df[(df["LOCALIZACAO"] == "Rural") & (df["DEPENDENCIA"] == "Federal")]["MEDIA"].mean()
+        urb_priv = df[(df["LOCALIZACAO"] == "Urbana") & (df["DEPENDENCIA"] == "Privada")]["MEDIA"].mean()
         st.markdown(f'<div class="insight-box">', unsafe_allow_html=True)
         st.markdown(f"**  Onde a rural se destaca?**")
         st.markdown(f"""
-        Escolas rurais da rede **Federal** (Institutos Federais no interior) têm desempenho 
-        equivalente a escolas urbanas privadas — um oásis de qualidade no campo.
+        Escolas rurais da rede **Federal** (Institutos Federais no interior) atingem **{rural_fed:.0f} pontos**,
+        ante **{urb_priv:.0f}** das urbanas privadas — diferença de **{urb_priv - rural_fed:.0f} pontos**.
         """)
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -470,12 +473,19 @@ with c14:
                            margin=dict(l=0, r=0, t=50, b=0))
     st.plotly_chart(fig_gap2, use_container_width=True)
 
+gap_priv_pub_anos = nac_rede.pivot(index="ANO", columns="REDE", values="MEDIA")
+gap_priv_pub_anos["GAP"] = gap_priv_pub_anos["Privada"] - gap_priv_pub_anos["Estadual"]
+gap_priv_pub_anos["GAP_FED"] = gap_priv_pub_anos["Privada"] - gap_priv_pub_anos["Federal"]
+gap_min = gap_priv_pub_anos["GAP"].min()
+gap_max = gap_priv_pub_anos["GAP"].max()
+gap_fed_2014 = gap_priv_pub_anos.loc[2014, "GAP_FED"]
+gap_fed_2025 = gap_priv_pub_anos.loc[2025, "GAP_FED"]
 st.markdown('<div class="insight-box">', unsafe_allow_html=True)
 st.markdown("**  O gap estável**")
-st.markdown("""
+st.markdown(f"""
 Ao contrário do que se poderia esperar, o gap entre redes privada e pública **não diminuiu** 
-em 12 anos — permaneceu entre 80 e 90 pontos. As federais, porém, reduziram discretamente 
-a distância para as privadas a partir de 2022.
+em 12 anos — variou de {gap_min:.0f} a {gap_max:.0f} pontos (em 2025: {gap_priv_pub_anos.loc[2025, 'GAP']:.0f} pts). 
+As federais, porém, reduziram a distância para as privadas de {gap_fed_2014:.0f} para {gap_fed_2025:.0f} pontos.
 
 Já o abismo regional **aumentou**: Norte e Nordeste perderam terreno relativo para o Sul 
 na segunda metade da década.
@@ -524,20 +534,39 @@ with c16:
 st.markdown("###   Quem Mais Evoluiu?")
 
 evol = tab_completa.groupby(["NO_MUNICIPIO_ESC", "SG_UF_ESC", "ANO"])["MEDIA"].mean().reset_index()
-evol_mun = evol.pivot(index=["NO_MUNICIPIO_ESC", "SG_UF_ESC"], columns="ANO", values="MEDIA").dropna()
-if 2014 in evol_mun.columns and 2025 in evol_mun.columns:
-    evol_mun["EVOLUCAO"] = evol_mun[2025] - evol_mun[2014]
-    top_evol = evol_mun.nlargest(10, "EVOLUCAO").reset_index()
-    top_evol["MUN"] = top_evol["NO_MUNICIPIO_ESC"] + " - " + top_evol["SG_UF_ESC"]
+evol_pivot = evol.pivot(index=["NO_MUNICIPIO_ESC", "SG_UF_ESC"], columns="ANO", values="MEDIA")
 
-    fig_evol = px.bar(top_evol, x="EVOLUCAO", y="MUN", orientation="h",
-                      color="EVOLUCAO", color_continuous_scale="Blues",
-                      text=top_evol["EVOLUCAO"].round(1).astype(str))
-    fig_evol.update_layout(title="Municípios com Maior Evolução 2014→2025", height=400,
-                           yaxis=dict(categoryorder="total ascending"), showlegend=False,
-                           margin=dict(l=0, r=0, t=50, b=0))
-    fig_evol.update_traces(textposition="outside")
-    st.plotly_chart(fig_evol, use_container_width=True)
+evol_list = []
+for idx in evol_pivot.index:
+    row = evol_pivot.loc[idx]
+    valid = row.dropna()
+    if len(valid) >= 2:
+        first_ano = int(valid.index[0])
+        last_ano = int(valid.index[-1])
+        evol_list.append({
+            "NO_MUNICIPIO_ESC": idx[0],
+            "SG_UF_ESC": idx[1],
+            "PRIMEIRO_ANO": first_ano,
+            "ULTIMO_ANO": last_ano,
+            "MEDIA_INI": valid.iloc[0],
+            "MEDIA_FIM": valid.iloc[-1],
+            "EVOLUCAO": valid.iloc[-1] - valid.iloc[0],
+        })
+
+top_evol = pd.DataFrame(evol_list).sort_values("EVOLUCAO", ascending=False).head(10)
+top_evol["MUN"] = top_evol["NO_MUNICIPIO_ESC"] + " - " + top_evol["SG_UF_ESC"]
+top_evol["ROTULO"] = top_evol.apply(
+    lambda r: f"{r['EVOLUCAO']:.1f} ({r['PRIMEIRO_ANO']}→{r['ULTIMO_ANO']})", axis=1
+)
+
+fig_evol = px.bar(top_evol, x="EVOLUCAO", y="MUN", orientation="h",
+                  color="EVOLUCAO", color_continuous_scale="Blues",
+                  text=top_evol["ROTULO"])
+fig_evol.update_layout(title="Municípios com Maior Evolução (primeiro → último ano disponível)", height=400,
+                       yaxis=dict(categoryorder="total ascending"), showlegend=False,
+                       margin=dict(l=0, r=0, t=50, b=0))
+fig_evol.update_traces(textposition="outside")
+st.plotly_chart(fig_evol, use_container_width=True)
 
 st.markdown("---")
 
@@ -549,8 +578,6 @@ st.markdown("O que os dados sugerem para os próximos anos?")
 c17, c18 = st.columns([2, 1])
 
 with c17:
-    from numpy.polynomial.polynomial import polyfit
-
     x_anos = nac["ANO"].values
     y_media = nac["MEDIA"].values
     coefs = np.polyfit(x_anos, y_media, 1)
@@ -584,7 +611,7 @@ with c17:
 
 with c18:
     target_2030 = trend(2030)
-    current = nac[nac["ANO"] == 2025]["MEDIA"].values[0]
+    current = nac_idx.loc[2025]
     needed = target_2030 - current
     st.markdown(f'<div class="insight-box">', unsafe_allow_html=True)
     st.markdown(f"**  Projeção para 2030**")
