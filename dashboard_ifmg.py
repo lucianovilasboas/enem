@@ -118,19 +118,20 @@ with c_titulo:
     st.markdown("<p class='subtitle'>A trajetória do Instituto Federal de Minas Gerais no ENEM 2014–2025 — desempenho, evolução e comparação com o Brasil</p>", unsafe_allow_html=True)
 
 # KPIs
-media_ifmg_geral = df_ifmg["MEDIA"].mean()
+df_ifmg_fed = df_ifmg[df_ifmg["DEPENDENCIA"] == "Federal"]
+media_ifmg_geral = df_ifmg_fed["MEDIA"].mean()
 media_mg_federal = df[(df["SG_UF_ESC"] == "MG") & (df["DEPENDENCIA"] == "Federal")]["MEDIA"].mean()
 media_br_federal = df[df["DEPENDENCIA"] == "Federal"]["MEDIA"].mean()
 media_br_geral = df["MEDIA"].mean()
-melhor_campus = df_ifmg.groupby("CAMPUS")["MEDIA"].mean().idxmax()
-total_reg = len(df_ifmg)
+melhor_campus = df_ifmg_fed.groupby("CAMPUS")["MEDIA"].mean().idxmax()
+total_reg = len(df_ifmg_fed)
 
 k1, k2, k3, k4, k5 = st.columns(5)
 with k1:
     st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-value ifmg-green">{media_ifmg_geral:.1f}</div>
-        <div class="kpi-label">Média IFMG (Geral)</div>
+        <div class="kpi-label">Média IFMG (Rede Federal)</div>
     </div>""", unsafe_allow_html=True)
 with k2:
     st.markdown(f"""
@@ -139,7 +140,7 @@ with k2:
         <div class="kpi-label">Média MG (Rede Federal)</div>
     </div>""", unsafe_allow_html=True)
 with k3:
-    diff = abs(media_ifmg_geral - media_br_federal)
+    diff = media_ifmg_geral - media_br_federal
     cor = "#2ecc71" if diff > 0 else "#e74c3c"
     st.markdown(f"""
     <div class="kpi-card">
@@ -156,7 +157,7 @@ with k5:
     st.markdown(f"""
     <div class="kpi-card">
         <div class="kpi-value">{total_reg:,}</div>
-        <div class="kpi-label">Registros IFMG</div>
+        <div class="kpi-label">Registros IFMG (Federal)</div>
     </div>""", unsafe_allow_html=True)
 
 st.markdown("---")
@@ -201,19 +202,24 @@ with c2:
     st.markdown('<div class="insight-box">', unsafe_allow_html=True)
     st.markdown("**  IFMG acima da média**")
     diff_ifmg_br = media_ifmg_geral - media_br_federal
+    diff_ifmg_mg = media_ifmg_geral - media_mg_federal
     st.markdown(f"""
-    O IFMG supera a média da rede federal brasileira em **{abs(diff_ifmg_br):.1f} pontos** 
-    e a média mineira da rede federal em **{abs(media_ifmg_geral - media_mg_federal):.1f} pontos**.
+    O IFMG supera a média da rede federal brasileira em **{diff_ifmg_br:.1f} pontos** 
+    e a média mineira da rede federal em **{diff_ifmg_mg:.1f} pontos**.
     """)
     st.markdown("</div>", unsafe_allow_html=True)
 
     st.markdown('<div class="insight-box">', unsafe_allow_html=True)
     st.markdown("**  Crescimento consistente**")
-    evol_ifmg = ifmg_geral[ifmg_geral["DEPENDENCIA"] == "Federal"].groupby("CAMPUS")["MEDIA"].mean().reset_index() if "CAMPUS" in ifmg_geral.columns else None
+    fed_evol = ifmg_geral[ifmg_geral["DEPENDENCIA"] == "Federal"].set_index("ANO")["MEDIA"]
+    ano_ini = int(fed_evol.first_valid_index())
+    ano_fim = int(fed_evol.last_valid_index())
+    med_ini = fed_evol.loc[ano_ini]
+    med_fim = fed_evol.loc[ano_fim]
     st.markdown(f"""
-    A média dos campi IFMG subiu de **{ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2014)]['MEDIA'].values[0]:.0f}** (2014) 
-    para **{ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2025)]['MEDIA'].values[0]:.0f}** (2025) — 
-    um crescimento de **{abs(ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2025)]['MEDIA'].values[0] - ifmg_geral[(ifmg_geral['DEPENDENCIA']=='Federal') & (ifmg_geral['ANO']==2014)]['MEDIA'].values[0]):.0f} pontos**.
+    A média dos campi IFMG subiu de **{med_ini:.0f}** ({ano_ini}) 
+    para **{med_fim:.0f}** ({ano_fim}) — 
+    um crescimento de **{med_fim - med_ini:.0f} pontos**.
     """)
     st.markdown("</div>", unsafe_allow_html=True)
 
@@ -293,31 +299,51 @@ st.markdown("A trajetória individual de cada campus ao longo da década.")
 c5, c6 = st.columns(2)
 
 with c5:
-    evol_campus = df_ifmg[df_ifmg["DEPENDENCIA"] == "Federal"].pivot_table(
-        index="CAMPUS", columns="ANO", values="MEDIA"
-    ).dropna(subset=[2014, 2025], how="any")
-    evol_campus["EVOLUCAO"] = evol_campus[2025] - evol_campus[2014]
-    evol_campus = evol_campus.sort_values("EVOLUCAO", ascending=False).reset_index()
+    evol_data = df_ifmg[df_ifmg["DEPENDENCIA"] == "Federal"].groupby(["CAMPUS", "ANO"]).agg(
+        MEDIA=("MEDIA", "mean"), ALUNOS=("ALUNOS", "sum")
+    ).reset_index()
+    evol_data = evol_data[evol_data["ALUNOS"] >= 10]
 
-    fig_evol = px.bar(evol_campus.head(10), x="EVOLUCAO", y="CAMPUS", orientation="h",
-                      color="EVOLUCAO", color_continuous_scale="Greens",
-                      text=evol_campus.head(10)["EVOLUCAO"].round(1).astype(str),
-                      title="Maior Evolução 2014 → 2025 (em pontos)")
-    fig_evol.update_layout(height=400, yaxis=dict(categoryorder="total ascending"),
-                           showlegend=False, margin=dict(l=0, r=0, t=50, b=0))
-    fig_evol.update_traces(textposition="outside")
-    st.plotly_chart(fig_evol, use_container_width=True)
+    evol_campus_list = []
+    for campus, grp in evol_data.groupby("CAMPUS"):
+        grp = grp.sort_values("ANO")
+        if len(grp) >= 2:
+            first = grp.iloc[0]
+            last = grp.iloc[-1]
+            evol_campus_list.append({
+                "CAMPUS": campus,
+                "PRIMEIRO_ANO": int(first["ANO"]),
+                "ULTIMO_ANO": int(last["ANO"]),
+                "MEDIA_INI": first["MEDIA"],
+                "MEDIA_FIM": last["MEDIA"],
+                "EVOLUCAO": last["MEDIA"] - first["MEDIA"],
+            })
+
+    evol_campus = pd.DataFrame(evol_campus_list).sort_values("EVOLUCAO", ascending=False)
+    if not evol_campus.empty:
+        evol_campus["ROTULO"] = evol_campus.apply(
+            lambda r: f"{r['EVOLUCAO']:.1f} ({r['PRIMEIRO_ANO']}→{r['ULTIMO_ANO']})", axis=1
+        )
+        fig_evol = px.bar(evol_campus.head(10), x="EVOLUCAO", y="CAMPUS", orientation="h",
+                          color="EVOLUCAO", color_continuous_scale="Greens",
+                          text=evol_campus.head(10)["ROTULO"],
+                          title="Maior Evolução (primeiro → último ano disponível)")
+        fig_evol.update_layout(height=400, yaxis=dict(categoryorder="total ascending"),
+                               showlegend=False, margin=dict(l=0, r=0, t=50, b=0))
+        fig_evol.update_traces(textposition="outside")
+        st.plotly_chart(fig_evol, use_container_width=True)
 
 with c6:
-    estagnados = evol_campus.sort_values("EVOLUCAO").head(10)
-    fig_est = px.bar(estagnados, x="EVOLUCAO", y="CAMPUS", orientation="h",
-                     color="EVOLUCAO", color_continuous_scale="Reds_r",
-                     text=estagnados["EVOLUCAO"].round(1).astype(str),
-                     title="Menor Evolução 2014 → 2025")
-    fig_est.update_layout(height=400, yaxis=dict(categoryorder="total ascending"),
-                          showlegend=False, margin=dict(l=0, r=0, t=50, b=0))
-    fig_est.update_traces(textposition="outside")
-    st.plotly_chart(fig_est, use_container_width=True)
+    if not evol_campus.empty:
+        estagnados = evol_campus.sort_values("EVOLUCAO").head(10)
+        fig_est = px.bar(estagnados, x="EVOLUCAO", y="CAMPUS", orientation="h",
+                         color="EVOLUCAO", color_continuous_scale="Reds_r",
+                         text=estagnados["ROTULO"],
+                         title="Menor Evolução (primeiro → último ano disponível)")
+        fig_est.update_layout(height=400, yaxis=dict(categoryorder="total ascending"),
+                              showlegend=False, margin=dict(l=0, r=0, t=50, b=0))
+        fig_est.update_traces(textposition="outside")
+        st.plotly_chart(fig_est, use_container_width=True)
 
 # Bump chart dos campi
 st.markdown("###   Corrida dos Campi: Ranking Ano a Ano")
@@ -494,7 +520,7 @@ st.markdown("---")
 st.markdown(f"""
 <div style="text-align:center; color:#666; font-size:0.85rem; padding:1rem;">
     Dashboard IFMG no ENEM — Dados ENEM/INEP (2014–2025) | {datetime.now().strftime('%B %Y')}<br>
-    {len(CAMPUS_CIDADES)} campi analisados em {len(df_ifmg):,} registros ao longo de 12 anos.
+    {len(CAMPUS_CIDADES)} campi analisados em {len(df_ifmg_fed):,} registros ao longo de 12 anos.
     https://www.gov.br/inep/pt-br/acesso-a-informacao/dados-abertos/microdados/enem.<br>
     Desenvolvido por luciano.espiriao@ifmg.edu.br. 2026 - Todos os direitos reservados.    
 </div>
