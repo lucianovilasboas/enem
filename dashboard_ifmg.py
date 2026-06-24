@@ -150,7 +150,7 @@ with k3:
 with k4:
     st.markdown(f"""
     <div class="kpi-card">
-        <div class="kpi-value" style="color:#f39c12">{melhor_campus}</div>
+        <div class="kpi-value" style="color:#f39c12">{melhor_campus[:20]}</div>
         <div class="kpi-label">Maior média</div>
     </div>""", unsafe_allow_html=True)
 with k5:
