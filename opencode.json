@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "firecrawl": {
+      "type": "local",
+      "command": ["npx", "-y", "firecrawl-mcp"],
+      "enabled": true,
+      "environment": {
+        "FIRECRAWL_API_KEY": "fc-c927ff07857741e7b708e4300a2e9f44",
+        "FIRECRAWL_RETRY_MAX_ATTEMPTS": "5",
+        "FIRECRAWL_RETRY_INITIAL_DELAY": "2000",
+        "FIRECRAWL_RETRY_MAX_DELAY": "30000",
+        "FIRECRAWL_RETRY_BACKOFF_FACTOR": "3",
+        "FIRECRAWL_CREDIT_WARNING_THRESHOLD": "2000",
+        "FIRECRAWL_CREDIT_CRITICAL_THRESHOLD": "500"
+      }
+    }
+  }
+}
