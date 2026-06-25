@@ -74,7 +74,7 @@ def pagina_home():
     with r2c1:
         st.markdown("""
         <div class="card">
-            <h3>  IFMG no ENEM</h3>
+            <h3>🎓 IFMG no ENEM</h3>
             <p>Trajetória detalhada do IFMG no ENEM 2014–2025: ranking de campi, evolução por disciplina, comparação com redes locais e tabela completa.</p>
         </div>
         """, unsafe_allow_html=True)
