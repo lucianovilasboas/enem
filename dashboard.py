@@ -51,14 +51,14 @@ def pagina_home():
     with r1c1:
         st.markdown("""
         <div class="card">
-            <h3>  ENEM Nacional</h3>
+            <h3>📊 ENEM Nacional</h3>
             <p>Evolução das médias nacionais, redes de ensino, regiões, disciplinas, ranking de estados e projeções para o futuro.</p>
         </div>
         """, unsafe_allow_html=True)
     with r1c2:
         st.markdown("""
         <div class="card">
-            <h3>  Rede Federal</h3>
+            <h3>🏫 Rede Federal no ENEM</h3>
             <p>Desempenho de toda a Rede Federal de Educação, Ciência e Tecnologia: IFs, CEFETs, Colégio Pedro II, UTFPR e Escolas Técnicas Vinculadas.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -81,7 +81,7 @@ def pagina_home():
     with r2c2:
         st.markdown("""
         <div class="card">
-            <h3>\U0001F50D Meu IF no ENEM</h3>
+            <h3>🔍 Minha Instituição no ENEM</h3>
             <p>Escolha qualquer Instituição Federal (IF, CEFET, UTFPR, CPII, ETV) e veja análises completas de desempenho, ranking de campi e evolução.</p>
         </div>
         """, unsafe_allow_html=True)
