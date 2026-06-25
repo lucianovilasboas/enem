@@ -65,7 +65,7 @@ def pagina_home():
     with r1c3:
         st.markdown("""
         <div class="card">
-            <h3>  IFMG vs Demais IFs</h3>
+            <h3>⚔️ IFMG vs Demais IFs</h3>
             <p>Comparação detalhada do IFMG com todos os outros institutos federais: desempenho, evolução, disciplinas e gap por campus.</p>
         </div>
         """, unsafe_allow_html=True)
